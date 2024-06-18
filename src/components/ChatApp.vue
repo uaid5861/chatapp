@@ -71,6 +71,7 @@ function sendMessage(text: string) {
     };
     messages.value.push(newMessage);
     updateLatestMessage(selectedContact.value.id, text, currentTime);
+    // test
   }
 }
 
