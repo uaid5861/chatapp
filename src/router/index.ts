@@ -9,17 +9,17 @@ const routes = [
        
         path: '/home',
         name: "home",
-        component: () => import('@/pages/MyHome.vue'),
+        component: () => import('../pages/MyHome.vue'),
         meta: {title: 'home'},
         children: [
             {
                 path: '/home/chathome',
-                component: () => import('@/components/ChatHome.vue'),
+                component: () => import('../components/ChatHome.vue'),
                 meta: {title: 'ChatHome'}
             },
             {
                 path: '/home/message',
-                component: () => import('@/components/ChatApp.vue'),
+                component: () => import('../components/ChatApp.vue'),
                 meta: {title: 'Message'}
            },
         ]
