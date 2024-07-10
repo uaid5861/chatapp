@@ -1,0 +1,1 @@
+import{_ as e}from"./_plugin-vue_export-helper-c27b6911.js";import{o,c}from"./index-93369542.js";const t={};function r(n,a){return o(),c("div",null,"chathome")}const m=e(t,[["render",r]]);export{m as default};
