@@ -45,6 +45,7 @@ interface Contact {
 }
 
 const props = defineProps<{ contacts: Contact[], activeContactId: number | null }>();
+const { contacts, activeContactId } = props;
 const emit = defineEmits<{ (e: 'selectContact', contact: Contact): void }>();
 
 function selectContact(contact: Contact) {

@@ -4,7 +4,7 @@
 </template>
 
 <script setup lang="ts">
-import ChatApp from "./components/ChatApp.vue";
+// import ChatApp from "./components/ChatApp.vue";
 </script>
 
 <style>
