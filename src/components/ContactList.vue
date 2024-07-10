@@ -1,3 +1,4 @@
+<!-- contactlist.vue -->
 <template>
   <div class="messagecontainer">
     <div class="top">

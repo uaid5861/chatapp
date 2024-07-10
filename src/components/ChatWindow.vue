@@ -4,26 +4,21 @@
     <div class="messages" ref="messagesContainer">
       <div v-for="message in messages" :key="message.id"
         :class="['message', message.sender === 'me' ? 'sent' : 'received']">
-        <p style="line-height: 1.8;font-weight: 500;">{{ message.text }}</p>
+        <p v-if="message.text" style="line-height: 1.8;font-weight: 500;">{{ message.text }}</p>
+        <img v-if="message.imageUrl" :src="message.imageUrl" alt="Image"
+          style="max-width: 100%; border-radius: 10px;" />
         <small>{{ formatTime(message.time) }}</small>
       </div>
     </div>
     <div class="putbar">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M11.97 12V15.5C11.97 17.43 13.54 19 15.47 19C17.4 19 18.97 17.43 18.97 15.5V10C18.97 6.13 15.84 3 11.97 3C8.1 3 4.97 6.13 4.97 10V16C4.97 19.31 7.66 22 10.97 22"
-          stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-
+      <!-- 图片预览 -->
+      <div v-if="newImageUrl" class="image-preview">
+        <img :src="newImageUrl" alt="Image Preview" />
+        <button @click="clearImage" class="remove-btn">x</button>
+      </div>
+      <input type="file" @change="handleImageUpload" v-if="!newImageUrl" class="imgboxbtn" />
       <input v-model="newMessage" @keyup.enter="handleSendMessage" placeholder="输入消息并按回车发送" class="sendmessage" />
-      <button @click="handleSendMessage" class="sendbtn">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M16.14 2.96001L7.11 5.96001C1.04 7.99001 1.04 11.3 7.11 13.32L9.79 14.21L10.68 16.89C12.7 22.96 16.02 22.96 18.04 16.89L21.05 7.87001C22.39 3.82001 20.19 1.61001 16.14 2.96001ZM16.46 8.34001L12.66 12.16C12.51 12.31 12.32 12.38 12.13 12.38C11.94 12.38 11.75 12.31 11.6 12.16C11.4605 12.0189 11.3823 11.8284 11.3823 11.63C11.3823 11.4316 11.4605 11.2412 11.6 11.1L15.4 7.28001C15.69 6.99001 16.17 6.99001 16.46 7.28001C16.75 7.57001 16.75 8.05001 16.46 8.34001Z"
-            fill="#fff" />
-        </svg>
-
-      </button>
+      <button @click="handleSendMessage" class="sendbtn">发送</button>
     </div>
   </div>
 </template>
@@ -40,26 +35,51 @@ interface Contact {
 interface Message {
   id: number;
   contactId: number;
-  text: string;
+  text?: string;
+  imageUrl?: string;
   time: string;
   sender: string;
 }
 
 const props = defineProps<{ contact: Contact; messages: Message[] }>();
-const emit = defineEmits<{ (e: 'sendMessage', message: string): void }>();
+const emit = defineEmits<{ (e: 'sendMessage', message: Message): void }>();
 
 const newMessage = ref('');
+const newImageUrl = ref('');
 const messagesContainer = ref<HTMLElement | null>(null);
 
 function handleSendMessage() {
-  if (newMessage.value.trim()) {
-    emit('sendMessage', newMessage.value);
+  if (newMessage.value.trim() || newImageUrl.value) {
+    const message = {
+      id: Date.now(),
+      contactId: props.contact.id,
+      text: newMessage.value.trim() || undefined,
+      imageUrl: newImageUrl.value || undefined,
+      time: new Date().toISOString(),
+      sender: 'me',
+    };
+    emit('sendMessage', message);
     newMessage.value = '';
+    newImageUrl.value = '';
     scrollToBottom();
   }
 }
 
-// Watch for messages prop changes and scroll to bottom when new message is added
+function handleImageUpload(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      newImageUrl.value = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function clearImage() {
+  newImageUrl.value = '';
+}
+
 watch(() => props.messages, async () => {
   await nextTick();
   scrollToBottom();
@@ -71,12 +91,11 @@ function scrollToBottom() {
   }
 }
 
-// Watch for contact prop changes and reset newMessage
 watch(() => props.contact, () => {
   newMessage.value = '';
+  newImageUrl.value = '';
 });
 
-// Function to format time
 function formatTime(time: string) {
   const currentTime = new Date();
   const messageTime = new Date(time);
@@ -108,7 +127,7 @@ function formatTime(time: string) {
   }
 
   .messages {
-    height: 600px;
+    height: 500px;
     overflow-y: scroll;
     width: 900px;
     display: flex;
@@ -159,15 +178,58 @@ function formatTime(time: string) {
   }
 
   .putbar {
-    width: 550px;
+    width: 650px;
+    height: 140px;
+    // background-color: pink;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-left: 120px;
+    margin-left: 50px;
     margin-top: 40px;
-    svg{
-      cursor: pointer;
+    // .imgboxbtn{
+      
+      
+    // }
+
+    .image-preview img {
+      max-width: 100px;
+      max-height: 100px;
+      margin-right: 10px;
+      
+      
     }
+    .image-preview{
+      
+      position: relative;
+    }
+    .remove-btn {
+      width: 20px;
+      height: 20px;
+      box-sizing: border-box;
+      border-radius: 999px;
+      // padding: 5px 10px;
+      cursor: pointer;
+      border: none;
+      background-color: rgba($color: #c7c6c6, $alpha: 0.6);
+      text-align: center;
+      position: absolute;
+      right: 0px;
+      top: -8px;
+      z-index: 100000;
+
+      &:hover {
+        background-color: rgba($color: #c7c6c6, $alpha: 1.0);
+      }
+    }
+
+   
+
+    .sendimg {
+      svg {
+        cursor: pointer;
+      }
+    }
+
     .sendmessage {
       width: 400px;
       height: 45px;
@@ -199,7 +261,8 @@ function formatTime(time: string) {
       transition: all 0.2s ease-in-out;
       cursor: pointer;
     }
-    .sendbtn:active{
+
+    .sendbtn:active {
       transform: scale(0.95);
     }
   }

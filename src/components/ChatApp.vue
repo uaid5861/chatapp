@@ -31,9 +31,10 @@ interface Contact {
 interface Message {
   id: number;
   contactId: number;
-  text: string;
-  time: string; // Add time property
-  sender: string; // Add sender property
+  text?: string;
+  imageUrl?: string;
+  time: string;
+  sender: string;
 }
 
 const contacts = ref<Contact[]>([
@@ -59,20 +60,9 @@ function getMessages(contactId: number) {
   return messages.value.filter(message => message.contactId === contactId).sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 }
 
-function sendMessage(text: string) {
-  if (selectedContact.value) {
-    const currentTime = new Date().toLocaleString(); // Get current time
-    const newMessage = {
-      id: Date.now(),
-      contactId: selectedContact.value.id,
-      text: text,
-      time: currentTime,
-      sender: 'me',
-    };
-    messages.value.push(newMessage);
-    updateLatestMessage(selectedContact.value.id, text, currentTime);
-    // test
-  }
+function sendMessage(message: Message) {
+  messages.value.push(message);
+  updateLatestMessage(message.contactId, message.text || '图片消息', message.time);
 }
 
 const revice = ref('');
@@ -115,8 +105,6 @@ function updateLatestMessage(contactId: number, text: string, time: string) {
   position: absolute;
   left: 0;
   bottom: 40px;
-  height: 40px;
-  width: 200px;
-  
+  height: 50px;
 }
 </style>
